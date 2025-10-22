@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Escapar del aula</title>
+  <style>
+    body {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+      font-family: Arial, sans-serif;
+      background-image: url('fondo1.jpg');
+      background-size: cover;
+      background-position: center;
+      background-repeat: no-repeat;
+      margin: 0;
+    }
+    .container {
+      background: rgba(255,255,255,0.8);
+      padding: 30px;
+      border-radius: 8px;
+      box-shadow: 0 0 8px rgba(0,0,0,0.2);
+      text-align: center;
+      width: 300px;
+    }
+    input {
+      width: 80%;
+      padding: 10px;
+      font-size: 1em;
+      margin: 15px 0;
+      text-align: center;
+    }
+    button {
+      padding: 10px 20px;
+      font-size: 1em;
+      cursor: pointer;
+      border: none;
+      background-color: #007bff;
+      color: white;
+      border-radius: 5px;
+    }
+    button:hover {
+      background-color: #0056b3;
+    }
+    p.error {
+      color: red;
+      margin-top: 10px;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h2>Ingresa el código para escapar del aula</h2>
+    <input type="password" id="codigo" placeholder="Código secreto" />
+    <br />
+    <button onclick="verificar()">Aceptar</button>
+    <p class="error" id="error"></p>
+  </div>
+
+  <script>
+    function verificar() {
+      const claveIngresada = document.getElementById('codigo').value;
+      const claveCorrectaCodificada = 'c29sbyBxdWllbmVzIGVudGllbmRlbiBsYSB0aWVycmEgcHVlZGVuIGVzY2FwYXLCoGRlwqBlbGxh';
+      const claveIngresadaCodificada = btoa(claveIngresada);
+
+      if (claveIngresadaCodificada === claveCorrectaCodificada) {
+        window.location.href = 'index2.html';
+      } else {
+        document.getElementById('error').textContent = 'Código incorrecto, intenta nuevamente.';
+      }
+    }
+  </script>
+</body>
+</html>
+
