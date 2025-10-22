@@ -5,67 +5,140 @@
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>Escapar del aula</title>
   <style>
-    body{display:flex;justify-content:center;align-items:center;height:100vh;font-family:Arial,Helvetica,sans-serif;
-      background-image:url('fondo1.jpg');background-size:cover;background-position:center;margin:0}
-    .container{background:rgba(255,255,255,0.92);padding:28px;border-radius:8px;box-shadow:0 4px 12px rgba(0,0,0,0.15);text-align:center;width:320px}
-    input{width:82%;padding:10px;font-size:1rem;margin:14px 0;text-align:center}
-    button{padding:10px 18px;font-size:1rem;cursor:pointer;border:none;background:#007bff;color:#fff;border-radius:6px}
-    p.error{color:red;margin-top:8px;min-height:18px}
+    body {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+      font-family: Arial, Helvetica, sans-serif;
+      background-image: url('fondo1.jpg');
+      background-size: cover;
+      background-position: center;
+      background-repeat: no-repeat;
+      margin: 0;
+    }
+    .container {
+      background: rgba(255, 255, 255, 0.9);
+      padding: 30px;
+      border-radius: 10px;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.25);
+      text-align: center;
+      width: 320px;
+    }
+    h2 {
+      font-size: 1.2rem;
+      margin-bottom: 10px;
+    }
+    input {
+      width: 85%;
+      padding: 10px;
+      font-size: 1rem;
+      margin: 15px 0;
+      text-align: center;
+      border: 1px solid #ccc;
+      border-radius: 6px;
+    }
+    button {
+      padding: 10px 20px;
+      font-size: 1rem;
+      cursor: pointer;
+      border: none;
+      background-color: #007bff;
+      color: white;
+      border-radius: 6px;
+      transition: background-color 0.2s ease;
+    }
+    button:hover {
+      background-color: #0056b3;
+    }
+    p.error {
+      color: red;
+      margin-top: 10px;
+      min-height: 18px;
+    }
   </style>
 </head>
 <body>
   <div class="container">
     <h2>Ingresa el código para escapar del aula</h2>
     <input type="password" id="codigo" placeholder="Código secreto" autocomplete="off" />
-    <br/>
+    <br />
     <button id="btnAceptar">Aceptar</button>
     <p class="error" id="error"></p>
   </div>
 
   <script>
-    // CLAVE guardada en base64 (decodificaremos con atob)
+    // --- CONFIGURACIÓN ---
     const CLAVE_BASE64 = 'c29sbyBxdWllbmVzIGVudGllbmRlbiBsYSB0aWVycmEgcHVlZGVuIGVzY2FwYXIgZGUgZWxsYQ==';
-    const CASE_INSENSITIVE = false; // ponlo true si querés que NO distinga mayúsculas
+    const DESTINO = 'index2.html';
+    const CASE_INSENSITIVE = false; // cambiar a true si no querés distinguir mayúsculas
 
-    const input = document.getElementById('codigo');
+    // --- REFERENCIAS DOM ---
+    const inputEl = document.getElementById('codigo');
     const btn = document.getElementById('btnAceptar');
-    const err = document.getElementById('error');
+    const errEl = document.getElementById('error');
 
+    // --- FUNCIÓN PRINCIPAL ---
     function verificar() {
-      err.textContent = '';
-      let valor = (input.value || '').trim(); // quitamos espacios en ambos extremos
+      errEl.textContent = '';
+      let raw = inputEl.value || '';
+      let valor = raw.trim();
 
-      // decodifica la clave "oficial" y también normaliza
-      let claveCorrecta;
+      // decodificar clave
+      let claveDec;
       try {
-        claveCorrecta = atob(CLAVE_BASE64);
+        claveDec = atob(CLAVE_BASE64);
       } catch (e) {
-        console.error('BASE64 inválido en CLAVE_BASE64:', e);
-        err.textContent = 'Error interno (clave corrupta).';
+        console.error('Error decodificando CLAVE_BASE64:', e);
+        errEl.textContent = 'Error interno: clave corrupta';
         return;
       }
 
+      // normalizar texto (por si hay espacios raros o tildes distintas)
+      try {
+        valor = valor.normalize('NFKC');
+        claveDec = claveDec.normalize('NFKC');
+      } catch(e){}
+
       if (CASE_INSENSITIVE) {
         valor = valor.toLowerCase();
-        claveCorrecta = claveCorrecta.toLowerCase();
+        claveDec = claveDec.toLowerCase();
       }
 
-      // debug: borra o comenta estos console.log en producción
-      console.log('valor ingresado (raw):', JSON.stringify(input.value));
-      console.log('valor normalizado:', JSON.stringify(valor));
-      console.log('clave correcta (decoded):', JSON.stringify(claveCorrecta));
+      // --- DEBUG DETALLADO ---
+      console.group('DEBUG - comprobación clave');
+      console.log('raw (sin trim):', JSON.stringify(raw));
+      console.log('valor (trim+nrm):', JSON.stringify(valor));
+      console.log('claveDec (atob):', JSON.stringify(claveDec));
+      console.log('longitudes -> valor:', valor.length, 'claveDec:', claveDec.length);
+      console.log('btoa(valor):', (()=>{ try{return btoa(valor);}catch(e){return 'btoa-error:'+e;} })());
+      console.log('CLAVE_BASE64 guardada:', CLAVE_BASE64);
+      function codes(s){const arr=[];for(let i=0;i<s.length;i++)arr.push(s.charCodeAt(i));return arr.join(',');}
+      console.log('codes valor:', codes(valor));
+      console.log('codes claveDec:', codes(claveDec));
+      console.groupEnd();
 
-      if (valor === claveCorrecta) {
-        window.location.href = 'index2.html';
+      // --- COMPARACIONES ---
+      const eqDecoded = (valor === claveDec);
+      const eqBase64 = (()=>{ try{return btoa(valor)===CLAVE_BASE64;}catch(e){return false;} })();
+      const eqCodes = (codes(valor) === codes(claveDec));
+
+      console.log('eqDecoded:', eqDecoded, 'eqBase64:', eqBase64, 'eqCodes:', eqCodes);
+
+      // --- VALIDACIÓN ---
+      if (eqDecoded || eqBase64 || eqCodes) {
+        console.log('✅ VERIFICACIÓN CORRECTA -> Redirigiendo a', DESTINO);
+        window.location.href = DESTINO;
       } else {
-        err.textContent = 'Código incorrecto, intenta nuevamente.';
-        input.value = '';
-        input.focus();
+        errEl.textContent = 'Código incorrecto, intenta nuevamente.';
+        inputEl.value = '';
+        inputEl.focus();
       }
     }
 
-    btn.addEventListener('click', function(e){ e.preventDefault(); verificar(); });
-    input.addEventListener('keydown', function(e){ if (e.key === 'Enter') { e.preventDefault(); verificar(); }});
+    // --- EVENTOS ---
+    btn.addEventListener('click', (e)=>{ e.preventDefault(); verificar(); });
+    inputEl.addEventListener('keydown', (e)=>{ if (e.key === 'Enter') { e.preventDefault(); verificar(); }});
   </script>
 </body>
 </html>
