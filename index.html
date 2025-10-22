@@ -5,73 +5,67 @@
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>Escapar del aula</title>
   <style>
-    body {
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      height: 100vh;
-      font-family: Arial, sans-serif;
-      background-image: url('fondo1.jpg');
-      background-size: cover;
-      background-position: center;
-      background-repeat: no-repeat;
-      margin: 0;
-    }
-    .container {
-      background: rgba(255,255,255,0.8);
-      padding: 30px;
-      border-radius: 8px;
-      box-shadow: 0 0 8px rgba(0,0,0,0.2);
-      text-align: center;
-      width: 300px;
-    }
-    input {
-      width: 80%;
-      padding: 10px;
-      font-size: 1em;
-      margin: 15px 0;
-      text-align: center;
-    }
-    button {
-      padding: 10px 20px;
-      font-size: 1em;
-      cursor: pointer;
-      border: none;
-      background-color: #007bff;
-      color: white;
-      border-radius: 5px;
-    }
-    button:hover {
-      background-color: #0056b3;
-    }
-    p.error {
-      color: red;
-      margin-top: 10px;
-    }
+    body{display:flex;justify-content:center;align-items:center;height:100vh;font-family:Arial,Helvetica,sans-serif;
+      background-image:url('fondo1.jpg');background-size:cover;background-position:center;margin:0}
+    .container{background:rgba(255,255,255,0.92);padding:28px;border-radius:8px;box-shadow:0 4px 12px rgba(0,0,0,0.15);text-align:center;width:320px}
+    input{width:82%;padding:10px;font-size:1rem;margin:14px 0;text-align:center}
+    button{padding:10px 18px;font-size:1rem;cursor:pointer;border:none;background:#007bff;color:#fff;border-radius:6px}
+    p.error{color:red;margin-top:8px;min-height:18px}
   </style>
 </head>
 <body>
   <div class="container">
     <h2>Ingresa el código para escapar del aula</h2>
-    <input type="password" id="codigo" placeholder="Código secreto" />
-    <br />
-    <button onclick="verificar()">Aceptar</button>
+    <input type="password" id="codigo" placeholder="Código secreto" autocomplete="off" />
+    <br/>
+    <button id="btnAceptar">Aceptar</button>
     <p class="error" id="error"></p>
   </div>
 
   <script>
-    function verificar() {
-      const claveIngresada = document.getElementById('codigo').value;
-      const claveCorrectaCodificada = 'MTIzNA==';
-      const claveIngresadaCodificada = btoa(claveIngresada);
+    // CLAVE guardada en base64 (decodificaremos con atob)
+    const CLAVE_BASE64 = 'c29sbyBxdWllbmVzIGVudGllbmRlbiBsYSB0aWVycmEgcHVlZGVuIGVzY2FwYXIgZGUgZWxsYQ==';
+    const CASE_INSENSITIVE = false; // ponlo true si querés que NO distinga mayúsculas
 
-      if (claveIngresadaCodificada === claveCorrectaCodificada) {
+    const input = document.getElementById('codigo');
+    const btn = document.getElementById('btnAceptar');
+    const err = document.getElementById('error');
+
+    function verificar() {
+      err.textContent = '';
+      let valor = (input.value || '').trim(); // quitamos espacios en ambos extremos
+
+      // decodifica la clave "oficial" y también normaliza
+      let claveCorrecta;
+      try {
+        claveCorrecta = atob(CLAVE_BASE64);
+      } catch (e) {
+        console.error('BASE64 inválido en CLAVE_BASE64:', e);
+        err.textContent = 'Error interno (clave corrupta).';
+        return;
+      }
+
+      if (CASE_INSENSITIVE) {
+        valor = valor.toLowerCase();
+        claveCorrecta = claveCorrecta.toLowerCase();
+      }
+
+      // debug: borra o comenta estos console.log en producción
+      console.log('valor ingresado (raw):', JSON.stringify(input.value));
+      console.log('valor normalizado:', JSON.stringify(valor));
+      console.log('clave correcta (decoded):', JSON.stringify(claveCorrecta));
+
+      if (valor === claveCorrecta) {
         window.location.href = 'index2.html';
       } else {
-        document.getElementById('error').textContent = 'Código incorrecto, intenta nuevamente.';
+        err.textContent = 'Código incorrecto, intenta nuevamente.';
+        input.value = '';
+        input.focus();
       }
     }
+
+    btn.addEventListener('click', function(e){ e.preventDefault(); verificar(); });
+    input.addEventListener('keydown', function(e){ if (e.key === 'Enter') { e.preventDefault(); verificar(); }});
   </script>
 </body>
 </html>
-
